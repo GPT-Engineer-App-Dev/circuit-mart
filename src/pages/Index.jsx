@@ -1,7 +1,36 @@
-import { Box, Container, VStack, Text, Heading, Image, SimpleGrid, Link, Flex, Spacer, HStack, Button, Input, InputGroup, InputRightElement } from "@chakra-ui/react";
+import { useState } from "react";
+import { Box, Container, VStack, Text, Heading, Image, SimpleGrid, Link, Flex, Spacer, HStack, Button, Input, InputGroup, InputRightElement, Select, Checkbox, CheckboxGroup } from "@chakra-ui/react";
 import { FaFacebook, FaTwitter, FaInstagram, FaSearch } from "react-icons/fa";
 
 const Index = () => {
+  const [filters, setFilters] = useState({
+    priceRange: "",
+    brand: "",
+    ratings: ""
+  });
+
+  const [products, setProducts] = useState([
+    { id: 1, name: "Product 1", description: "Description of Product 1", price: 100, brand: "Brand A", ratings: 4, image: "https://via.placeholder.com/300" },
+    { id: 2, name: "Product 2", description: "Description of Product 2", price: 200, brand: "Brand B", ratings: 5, image: "https://via.placeholder.com/300" },
+    { id: 3, name: "Product 3", description: "Description of Product 3", price: 150, brand: "Brand A", ratings: 3, image: "https://via.placeholder.com/300" }
+  ]);
+
+  const handleFilterChange = (e) => {
+    const { name, value } = e.target;
+    setFilters({
+      ...filters,
+      [name]: value
+    });
+  };
+
+  const filteredProducts = products.filter(product => {
+    return (
+      (filters.priceRange === "" || (filters.priceRange === "low" && product.price < 150) || (filters.priceRange === "high" && product.price >= 150)) &&
+      (filters.brand === "" || product.brand === filters.brand) &&
+      (filters.ratings === "" || product.ratings >= parseInt(filters.ratings))
+    );
+  });
+
   return (
     <Container maxW="container.xl" p={0}>
       {/* Navigation Bar */}
@@ -27,34 +56,55 @@ const Index = () => {
         <Button colorScheme="blue" size="lg">Shop Now</Button>
       </Box>
 
+      {/* Filter Section */}
+      <Box as="section" py={10}>
+        <Heading size="xl" textAlign="center" mb={10}>Filter Products</Heading>
+        <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10} mb={10}>
+          <Box>
+            <Text mb={2}>Price Range</Text>
+            <Select name="priceRange" value={filters.priceRange} onChange={handleFilterChange}>
+              <option value="">All</option>
+              <option value="low">Below $150</option>
+              <option value="high">$150 and above</option>
+            </Select>
+          </Box>
+          <Box>
+            <Text mb={2}>Brand</Text>
+            <Select name="brand" value={filters.brand} onChange={handleFilterChange}>
+              <option value="">All</option>
+              <option value="Brand A">Brand A</option>
+              <option value="Brand B">Brand B</option>
+            </Select>
+          </Box>
+          <Box>
+            <Text mb={2}>Ratings</Text>
+            <Select name="ratings" value={filters.ratings} onChange={handleFilterChange}>
+              <option value="">All</option>
+              <option value="3">3 stars & above</option>
+              <option value="4">4 stars & above</option>
+              <option value="5">5 stars</option>
+            </Select>
+          </Box>
+        </SimpleGrid>
+      </Box>
+
       {/* Product Listing Section */}
       <Box as="section" py={10}>
         <Heading size="xl" textAlign="center" mb={10}>Featured Products</Heading>
         <SimpleGrid columns={{ base: 1, md: 3 }} spacing={10}>
-          <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-            <Image src="https://via.placeholder.com/300" alt="Product 1" />
-            <Box p={6}>
-              <Heading size="md" mb={2}>Product 1</Heading>
-              <Text mb={4}>Description of Product 1</Text>
-              <Button colorScheme="blue">View Details</Button>
+          {filteredProducts.map(product => (
+            <Box key={product.id} borderWidth="1px" borderRadius="lg" overflow="hidden">
+              <Image src={product.image} alt={product.name} />
+              <Box p={6}>
+                <Heading size="md" mb={2}>{product.name}</Heading>
+                <Text mb={4}>{product.description}</Text>
+                <Text mb={4}>${product.price}</Text>
+                <Text mb={4}>Brand: {product.brand}</Text>
+                <Text mb={4}>Ratings: {product.ratings} stars</Text>
+                <Button colorScheme="blue">View Details</Button>
+              </Box>
             </Box>
-          </Box>
-          <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-            <Image src="https://via.placeholder.com/300" alt="Product 2" />
-            <Box p={6}>
-              <Heading size="md" mb={2}>Product 2</Heading>
-              <Text mb={4}>Description of Product 2</Text>
-              <Button colorScheme="blue">View Details</Button>
-            </Box>
-          </Box>
-          <Box borderWidth="1px" borderRadius="lg" overflow="hidden">
-            <Image src="https://via.placeholder.com/300" alt="Product 3" />
-            <Box p={6}>
-              <Heading size="md" mb={2}>Product 3</Heading>
-              <Text mb={4}>Description of Product 3</Text>
-              <Button colorScheme="blue">View Details</Button>
-            </Box>
-          </Box>
+          ))}
         </SimpleGrid>
       </Box>
 
